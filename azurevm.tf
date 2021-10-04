@@ -24,6 +24,8 @@ module "linuxservers" {
   source_address_prefixes = ["${data.external.myipaddr.result.ip}/32"]
   enable_ssh_key          = true
 
+  custom_data = filebase64("files/k8s-setup.sh")
+
   depends_on = [azurerm_resource_group.k8s]
 }
 
