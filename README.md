@@ -4,7 +4,6 @@ List of content
 - https://registry.terraform.io/modules/Azure/compute/azurerm/latest
 - https://registry.terraform.io/modules/terraform-aws-modules/ec2-instance/aws/latest
 
-
 ## Cloud authentication
 ### Azure
 
