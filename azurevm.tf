@@ -24,11 +24,9 @@ module "linuxservers" {
   source_address_prefixes = ["${data.external.myipaddr.result.ip}/32"]
   enable_ssh_key          = true
 
-  custom_data = filebase64("files/k8s-setup.sh")
+  custom_data = filebase64("${path.module}/files/k8s-cluster-install.sh")
 
   depends_on = [azurerm_resource_group.k8s]
 }
 
-data "external" "myipaddr" {
-  program = ["bash", "-c", "curl -s 'https://ipinfo.io/json'"]
-}
+
