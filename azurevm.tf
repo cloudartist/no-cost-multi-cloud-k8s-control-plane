@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "k8s" {
-  name     = "k8s-control-plane"
+  name     = local.cluster_name
   location = "West Europe"
 }
 
@@ -28,5 +28,3 @@ module "linuxservers" {
 
   depends_on = [azurerm_resource_group.k8s]
 }
-
-
