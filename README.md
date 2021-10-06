@@ -27,9 +27,30 @@ Host ec2vm
 and then ssh using `ssh azurevm` or `ssh ec2vm`
 
 ## Controle Plane setup
+1. Ssh to Azure VM with `ssh azurevm`
+2. Update hostname with `sudo hostname k8s-control-plane-dev.westeurope.cloudapp.azure.com` (to be added to to custom data with template_file)
+3. Update kubelet cgroup driver to match docker (to be addedd to custom/user data)
 ```
-sudo kubeadm init  --ignore-preflight-errors=all  --pod-network-cidr=10.0.1.0/24
+cat <<EOF | sudo tee /etc/default/kubelet
+KUBELET_EXTRA_ARGS="--cgroup-driver=cgroupfs"
+EOF
 ```
+4. Initiate cluster with `kubeadm init`
+```
+sudo kubeadm init --control-plane-endpoint k8s-control-plane-dev.westeurope.cloudapp.azure.com \
+ --ignore-preflight-errors=all \
+ --upload-certs \
+ --pod-network-cidr=10.0.1.0/24
+```
+5. Ssh onto another node with `ssh ec2vm` and pull down required certs
+```
+sudo kubeadm join phase control-plane-prepare download-certs <args from step 4. output>
+```
+6. Join new node to cluster control plane with command shown in output of step 4.
+```
+sudo kubeadm join k8s-control-plane-dev.westeurope.cloudapp.azure.com:6443 --token <args from step 4. output>
+```
+
 ## Cloud authentication
 ### Azure
 
@@ -45,10 +66,23 @@ az account set --subscription=$(az account list | jq -r '.[0].id')
 aws configure 
 ```
 
+### Terraform deployment 
+```
+terraform init
+terraform plan
+terraform destroy
+```
+
 ## Troubleshooting 
 
 ### Azure 
 Custom data/cloud init logs
 ```
 /var/log/cloud-init.log
+```
+
+### k8s
+```
+kubectl -n kube-system get cm kubeadm-config -o yaml
+kubectl cluster-info dump
 ```
